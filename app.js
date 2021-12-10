@@ -5,7 +5,8 @@ const express = require('express');
 const app = express();
 
 // MIDDLEWARE ----------------------------------------------------------------------------------
-app.use(express.json);
+// Ce middleware intercepte toutes les requêtes qui ont un content-type json : accès au corps des requêtes
+app.use(express.json());
 
 // Ce middleware définit des en-têtes à la response permettant d'autorise les Cross-Origin pour cette ressource particulière (sauf ici puisqu'aucune route n'est définie)
 app.use((req, res, next) => {
@@ -18,9 +19,18 @@ app.use((req, res, next) => {
     next();
 })
 
-// le premier argument '/api/stuff' de use() est un string correspondant à une route dans laquelle
+// Middleware POST
+app.post('/api/stuff', (req, res, next) => {
+    // Nous n'avons ccès au body de request, uniquement grâce à use(express.json)
+    console.log(req.body); // pas de bdd pour l'instant => aucune persistence
+    res.status(201).json({
+        message: 'Objet créé ! '
+    }); // reponse obligatoire (la data a été "créée")
+});
+
+//Middleware GET : le premier argument '/api/stuff' de use() est un string correspondant à une route dans laquelle
 // nous voulons stocker notre élément de réponse : http://localhost:port_d_ecoute/api/stuff
-app.use('/api/stuff', (req, res, next) => {
+app.get('/api/stuff', (req, res, next) => {
     // create a Object Json format
     const stuff = [
       {
