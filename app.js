@@ -5,7 +5,23 @@ const express = require('express');
 const app = express();
 
 // MIDDLEWARE ----------------------------------------------------------------------------------
+app.use(express.json);
+
+// Ce middleware définit des en-têtes à la response permettant d'autorise les Cross-Origin pour cette ressource particulière (sauf ici puisqu'aucune route n'est définie)
+app.use((req, res, next) => {
+    // Les origines ayant accès aux datas (all)
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    // On donne la permission d'utiliser certains en-têtes
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
+    // On donne la permission d'utiliser certains méthodes
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
+    next();
+})
+
+// le premier argument '/api/stuff' de use() est un string correspondant à une route dans laquelle
+// nous voulons stocker notre élément de réponse : http://localhost:port_d_ecoute/api/stuff
 app.use('/api/stuff', (req, res, next) => {
+    // create a Object Json format
     const stuff = [
       {
         _id: 'oeihfzeoi',
@@ -24,7 +40,9 @@ app.use('/api/stuff', (req, res, next) => {
         userId: 'qsomihvqios',
       },
     ];
-    res.status(200).json(stuff);
+    // on set la réponse à status 200 OK avec comme retour un objet JSON
+    res.status(200).json(stuff); // ---> ceci va générer depuis le front :4200 une erreur CORS car les origines sont différentes entre le front et les ressources back (:4200, :3000)
+                                 // ---> système de sécurité par défaut / pour pallier à cela nous devons ajouter des règles de sécurités dans l'en-tête de la response
   });
 
 // EXPORT --------------------------------------------------------------------------------------
