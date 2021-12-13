@@ -36,7 +36,7 @@ app.use((req, res, next) => {
 
 // Middleware POST
 app.post('/api/stuff', (req, res, next) => {
-    // Nous n'avons ccès au body de request, uniquement grâce à use(express.json)
+    // Nous n'avons accès au body de request, uniquement grâce à use(express.json)
     console.log(req.body); // pas de bdd pour l'instant => aucune persistence
     res.status(201).json({
         message: 'Objet créé ! '
