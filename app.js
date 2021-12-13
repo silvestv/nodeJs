@@ -1,8 +1,23 @@
 // DECLARE -----------------------------------------------------------------------------------
+
+// import mongoose pour faciliter les interactions avec une base mongoDB
+const mongoose = require('mongoose');
 // import du node_module express permettant démarrer un serveur node selon le framework express.js
 const express = require('express');
 // point d'entrée de l'app express
 const app = express();
+
+// CONNECTION TO DATABASE --------------------------------------------------------------------------
+// Connect uri vers BDD mongoDB (username + password authentification)
+const connectUri = 'mongodb+srv://admin_openclassroom:private_openclassroom@cluster0.cl0lg.mongodb.net/test?retryWrites=true&w=majority';
+// cette commande permet de se connecter simplement grâce au package mongoose,
+// à une base de donnée MongoDB (nosql) simple et gratuite (by Atlas)
+mongoose.connect(connectUri,{
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+.then(_ => console.log('Connexion à MongoDb réussie ! '))
+.catch(_ => console.log('Connexion à MongoDB a échoué ! '));
 
 // MIDDLEWARE ----------------------------------------------------------------------------------
 // Ce middleware intercepte toutes les requêtes qui ont un content-type json : accès au corps des requêtes
@@ -26,6 +41,7 @@ app.post('/api/stuff', (req, res, next) => {
     res.status(201).json({
         message: 'Objet créé ! '
     }); // reponse obligatoire (la data a été "créée")
+    next();
 });
 
 //Middleware GET : le premier argument '/api/stuff' de use() est un string correspondant à une route dans laquelle
