@@ -1,9 +1,13 @@
 // DECLARE -----------------------------------------------------------------------------------
 
+// imports ----------------------
 // import mongoose pour faciliter les interactions avec une base mongoDB
 const mongoose = require('mongoose');
 // import du node_module express permettant démarrer un serveur node selon le framework express.js
 const express = require('express');
+// import du modèle mongoose simple
+const Thing = require('./models/Thing');
+//entry point ---------------------
 // point d'entrée de l'app express
 const app = express();
 
@@ -37,38 +41,63 @@ app.use((req, res, next) => {
 // Middleware POST
 app.post('/api/stuff', (req, res, next) => {
     // Nous n'avons accès au body de request, uniquement grâce à use(express.json)
-    console.log(req.body); // pas de bdd pour l'instant => aucune persistence
-    res.status(201).json({
-        message: 'Objet créé ! '
-    }); // reponse obligatoire (la data a été "créée")
-    next();
+    // console.log(req.body); // pas de bdd pour l'instant => aucune persistence
+    // res.status(201).json({
+    //     message: 'Objet créé ! '
+    // }); // reponse obligatoire (la data a été "créée")
+
+    // With mongoDb
+    // on retire l'id présent de base pour le laisser automatiquement généré par mongoDb
+    delete req.body._id;
+    // on génére une instance de notre modèle
+    const thing = new Thing({
+        ...req.body
+    });
+    // on save dans la db via la commande mongoose
+    // on renvoie un retour de réponse sinon expiration de la requête
+    thing.save()
+    .then(_ => res.status(201).json({ message: 'Objet enregistré ! ' }))
+    .catch(error => res.status(400).json({ error }));
 });
 
-//Middleware GET : le premier argument '/api/stuff' de use() est un string correspondant à une route dans laquelle
+// Middleware GET spécifique sur 1 objet
+app.get('/api/stuff/:id', (req, res, next) => {
+    Thing.findOne({ _id: req.params.id })
+    .then(thing => res.status(200).json(thing))
+    .catch(error => res.status(404).json({ error }));
+});
+
+//Middleware GET : le premier argument '/api/stuff' de get() est un string correspondant à une route dans laquelle
 // nous voulons stocker notre élément de réponse : http://localhost:port_d_ecoute/api/stuff
+// etape real bdd : ce getter permet de récupérer TOUT les objets THING
 app.get('/api/stuff', (req, res, next) => {
     // create a Object Json format
-    const stuff = [
-      {
-        _id: 'oeihfzeoi',
-        title: 'Mon premier objet',
-        description: 'Les infos de mon premier objet',
-        imageUrl: 'https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg',
-        price: 4900,
-        userId: 'qsomihvqios',
-      },
-      {
-        _id: 'oeihfzeomoihi',
-        title: 'Mon deuxième objet',
-        description: 'Les infos de mon deuxième objet',
-        imageUrl: 'https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg',
-        price: 2900,
-        userId: 'qsomihvqios',
-      },
-    ];
-    // on set la réponse à status 200 OK avec comme retour un objet JSON
-    res.status(200).json(stuff); // ---> ceci va générer depuis le front :4200 une erreur CORS car les origines sont différentes entre le front et les ressources back (:4200, :3000)
-                                 // ---> système de sécurité par défaut / pour pallier à cela nous devons ajouter des règles de sécurités dans l'en-tête de la response
+    // const stuff = [
+    //   {
+    //     _id: 'oeihfzeoi',
+    //     title: 'Mon premier objet',
+    //     description: 'Les infos de mon premier objet',
+    //     imageUrl: 'https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg',
+    //     price: 4900,
+    //     userId: 'qsomihvqios',
+    //   },
+    //   {
+    //     _id: 'oeihfzeomoihi',
+    //     title: 'Mon deuxième objet',
+    //     description: 'Les infos de mon deuxième objet',
+    //     imageUrl: 'https://cdn.pixabay.com/photo/2019/06/11/18/56/camera-4267692_1280.jpg',
+    //     price: 2900,
+    //     userId: 'qsomihvqios',
+    //   },
+    // ];
+    // // on set la réponse à status 200 OK avec comme retour un objet JSON
+    // res.status(200).json(stuff); // ---> ceci va générer depuis le front :4200 une erreur CORS car les origines sont différentes entre le front et les ressources back (:4200, :3000)
+    //                              // ---> système de sécurité par défaut / pour pallier à cela nous devons ajouter des règles de sécurités dans l'en-tête de la response
+
+    // With mongoDB
+    Thing.find()
+    .then(things => res.status(200).json(things))
+    .catch(error => res.status(400).json({ error }));
   });
 
 // EXPORT --------------------------------------------------------------------------------------
