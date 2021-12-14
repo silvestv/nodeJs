@@ -62,8 +62,11 @@ app.post('/api/stuff', (req, res, next) => {
 
 // Middleware GET spécifique sur 1 objet
 app.get('/api/stuff/:id', (req, res, next) => {
+    // findOne() retourne un seul objet de la DB correpondant au schema mongoose pour un id spécifique
     Thing.findOne({ _id: req.params.id })
+    // retour de succès au front-end
     .then(thing => res.status(200).json(thing))
+    // retour d'echec
     .catch(error => res.status(404).json({ error }));
 });
 
@@ -95,8 +98,11 @@ app.get('/api/stuff', (req, res, next) => {
     //                              // ---> système de sécurité par défaut / pour pallier à cela nous devons ajouter des règles de sécurités dans l'en-tête de la response
 
     // With mongoDB
+    // find() retourne tout les objets répondant au model mongoose Thing dans la db mongoDB
     Thing.find()
+    // la promise en cas de succès retourne une réponse 200 et un json things au front-end
     .then(things => res.status(200).json(things))
+    // sinon une erreur avec la raison de cette erreur
     .catch(error => res.status(400).json({ error }));
   });
 
