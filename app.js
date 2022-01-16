@@ -9,6 +9,12 @@ const express = require('express');
 // point d'entrée de l'app express
 const app = express();
 
+// DECLARATIONS OF ROUTES ----------------------------------------------------------------------------
+// routes (get, post, put, delete) des objets de l'application node
+const stuffRoutes = require('./routes/stuff');
+// routes (get, post, put, delete) des utilisateurs de l'application node
+const userRoutes = require('./routes/user');
+
 // CONNECTION TO DATABASE --------------------------------------------------------------------------
 // Connect uri vers BDD mongoDB (username + password authentification)
 const connectUri = 'mongodb+srv://admin_openclassroom:private_openclassroom@cluster0.cl0lg.mongodb.net/test?retryWrites=true&w=majority';
@@ -21,7 +27,7 @@ mongoose.connect(connectUri,{
 .then(_ => console.log('Connexion à MongoDb réussie ! '))
 .catch(_ => console.log('Connexion à MongoDB a échoué ! '));
 
-const stuffRoutes = require('./routes/stuff');
+
 // MIDDLEWARE DE CONF -------------------------------------------------------------------------------
 
 // Ce middleware intercepte toutes les requêtes qui ont un content-type json : accès au corps des requêtes
@@ -40,6 +46,8 @@ app.use((req, res, next) => {
 
 // l'app gère l'api stuff via son router et son controller stuff
 app.use('/api/stuff', stuffRoutes);
+// l'app gère l'api d'authentification via son router user et son controller user
+app.use('/api/auth', userRoutes);
 
 
 // EXPORT --------------------------------------------------------------------------------------
