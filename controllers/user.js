@@ -24,5 +24,31 @@ exports.signup = (req, res, next) => {
 
 // middelware pour l'authentification d'un utilisateur
 exports.login = (req, res, next) => {
-
+    // On commence par trouvé le User en BDD qui correspond à l'email remplit
+    // par l'utilisateur, on renvoit une erreur sinon
+    User.findOne({email: req.body.email })
+        .then(user => {
+            if( !user ) {
+                return res.status(401).json({ error: 'Utilisateur non trouvé ! '});
+            }
+            // Si on possède un utilisateur, on compage le mdp de la requete avec
+            // le hash en BDD via bcrypt
+            bcrypt.compare(req.body.password, user.password)
+                .then(valid => {
+                    // si le mdp est faux
+                    if( !valid ) {
+                        return res.status(401).json({ error: 'Mot de passe incorrect ! ' });
+                    }
+                    // sinon on retourne l'userid + un token à renvoyer vers le front-end pour 
+                    // permettre l'authentification
+                    res.status(200).json({
+                        userId: user._id,
+                        token: 'TOKEN'
+                    });
+                })
+                .catch(error => res.status(500).json({ error }));
+        })
+        // uniquement si on a un pb de connexion ou autres (pas si on a pas trouvé de user)
+        // auquel cas nous auront un retour vide (et non en erreur)
+        .catch(error => res.status(500).json({ error }));
 };
