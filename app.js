@@ -38,6 +38,7 @@ app.use((req, res, next) => {
     next();
 })
 
+// l'app gère l'api stuff via son router et son controller stuff
 app.use('/api/stuff', stuffRoutes);
 
 
