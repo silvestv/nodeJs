@@ -2,6 +2,8 @@
 const User = require('../models/User');
 // package node bcrypt importé ici, pour crypter les passwords avant enregistrement en BDD
 const bcrypt = require('bcrypt');
+// package node jsonwebtoken permet de créer des token et de les vérifier
+const jwt = require('jsonwebtoken');
 
 // middelware pour l'enregistrement d'un nouvel utilisateur
 exports.signup = (req, res, next) => {
@@ -43,7 +45,16 @@ exports.login = (req, res, next) => {
                     // permettre l'authentification
                     res.status(200).json({
                         userId: user._id,
-                        token: 'TOKEN'
+                        // on envoie au front end un token d'authentification qui permettra
+                        // de svaoir si chaque requêtes futures sont identifées
+                        token: jwt.sign(
+                            // payload => données que l'on souhaite encodées dans le token
+                           { userid: user._id },
+                           // clef secrête pour l'encodage (en prod nous utiliserions une chaines complexe et aléatoire)
+                           'RANDOM_TOKEN_SECRET', 
+                           // expiration du token (avant que l'utilisateur ne doive se reconnecter)
+                           { expiresIn: '24h'}
+                        )
                     });
                 })
                 .catch(error => res.status(500).json({ error }));
