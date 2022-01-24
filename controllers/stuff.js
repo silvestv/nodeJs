@@ -38,9 +38,32 @@ exports.modifyThing = (req, res, next) => {
 
 // logique du endpoint delete (router)
 exports.deleteThing = (req, res, next) =>{
-    Thing.deleteOne({_id: req.params.id})
-    .then(_ => res.status(200).json({message: 'Objet supprimé'}))
-    .catch(error => res.status(400).json({ error }));
+
+    // On récupère le thing pour checker son userId avec celui de 
+    // req.auth.userId ajouter en propriété dans le middleware
+    // auth.js
+    Thing.findOne({ _id: req.params.id }).then(
+        (thing) => {
+            // Si l'objet n'existe pas en bdd
+            if (!thing) {
+                return res.status(404).json({
+                    error: new Error('Objet non trouvé ! ')
+                });
+            }
+            // si l'objet n'appartient pas à l'utilisateur connecté
+            if (thing.userId !== req.auth.userId) {
+                return res.status(401).json({
+                    error: new Error('Requête non authorisée ! ')
+                });
+            } else {
+            // sinon poursuivre la suppression
+                Thing.deleteOne({_id: req.params.id})
+                .then(_ => res.status(200).json({message: 'Objet supprimé'}))
+                .catch(error => res.status(400).json({ error }));
+            }
+        }
+    );
+
 };
 
 // logique du endpoint get :id (router)

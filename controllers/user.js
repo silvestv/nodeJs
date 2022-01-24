@@ -49,7 +49,7 @@ exports.login = (req, res, next) => {
                         // de svaoir si chaque requêtes futures sont identifées
                         token: jwt.sign(
                             // payload => données que l'on souhaite encodées dans le token
-                           { userid: user._id },
+                           { userId: user._id },
                            // clef secrête pour l'encodage (en prod nous utiliserions une chaines complexe et aléatoire)
                            'RANDOM_TOKEN_SECRET', 
                            // expiration du token (avant que l'utilisateur ne doive se reconnecter)
