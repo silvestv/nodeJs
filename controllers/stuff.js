@@ -4,6 +4,9 @@
 // import du modèle mongoose simple
 const Thing = require('../models/Thing');
 
+// import filsystem pour avoir accès au operation de fichier system
+const fileSystem = require('fs');
+
 // CONTROLLER STUFF FRO EACH ENDPOINT -------------------------------------------------------------------------
 
 // ANCIEN controller for post stuff route
@@ -86,9 +89,15 @@ exports.deleteThing = (req, res, next) =>{
                 });
             } else {
             // sinon poursuivre la suppression
-                Thing.deleteOne({_id: req.params.id})
-                .then(_ => res.status(200).json({message: 'Objet supprimé'}))
-                .catch(error => res.status(400).json({ error }));
+
+            // On veut supprimer un fichier
+                const filename = thing.imageUrl.split('/images/')[1];
+                // unlink() du package fileSystem permet de supprimer un fichier
+                fileSystem.unlink(`images/${filename}`, () => {
+                    Thing.deleteOne({_id: req.params.id})
+                    .then(_ => res.status(200).json({message: 'Objet supprimé'}))
+                    .catch(error => res.status(400).json({ error }));
+                });
             }
         }
     );
