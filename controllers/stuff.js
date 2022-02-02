@@ -6,9 +6,10 @@ const Thing = require('../models/Thing');
 
 // CONTROLLER STUFF FRO EACH ENDPOINT -------------------------------------------------------------------------
 
+// ANCIEN controller for post stuff route
 //fonction permettant de contenir la logique métier de la route post 
 // et donc de la création d'objet Json
-exports.createThings = (req, res, next) => {
+// exports.createThings = (req, res, next) => {
 // Nous n'avons accès au body de request, uniquement grâce à use(express.json)
     // console.log(req.body); // pas de bdd pour l'instant => aucune persistence
     // res.status(201).json({
@@ -17,13 +18,34 @@ exports.createThings = (req, res, next) => {
 
     // With mongoDb
     // on retire l'id présent de base pour le laisser automatiquement généré par mongoDb
-    delete req.body._id;
+    // delete req.body._id;
     // on génére une instance de notre modèle
-    const thing = new Thing({
-        ...req.body
-    });
+    // const thing = new Thing({
+        // ...req.body
+    // });
     // on save dans la db via la commande mongoose
     // on renvoie un retour de réponse sinon expiration de la requête
+    // thing.save()
+    // .then(_ => res.status(201).json({ message: 'Objet enregistré ! ' }))
+    // .catch(error => res.status(400).json({ error }));
+//};
+
+// NOUVEAU controller for post stuff route
+// Pour ajouter un fichier à la requête, le front-end doit envoyer les données 
+// de la requête sous la forme form-data, et non sous forme de JSON. 
+// Le corps de la requête contient une chaîne thing , qui est simplement 
+// un objet Thing converti en chaîne. Nous devons donc l'analyser à l'aide 
+// de JSON.parse() pour obtenir un objet utilisable.
+exports.createThings = (req, res, next) => {
+    // With multer 
+    // extraction - transformation du body json en un js Object
+    const thingObject = JSON.parse(req.body.thing);
+    delete thingObject._id;
+    const thing = new Thing({
+        ...thingObject,
+        // Quel est l'url de l'image depuis que multer le génère grace au fichier
+        imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+    });
     thing.save()
     .then(_ => res.status(201).json({ message: 'Objet enregistré ! ' }))
     .catch(error => res.status(400).json({ error }));
@@ -31,7 +53,14 @@ exports.createThings = (req, res, next) => {
 
 // logique du endpoint put (router)
 exports.modifyThing = (req, res, next) => {
-    Thing.updateOne({ _id: req.params.id}, {...req.body, _id: req.params.id})
+    // modifie t'on avec ou sans nouvelle image ? --> requete différente
+    const thingObject = req.file ?
+     { 
+         ...JSON.parse(req.body.thing),
+         imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`
+     } 
+     : { ...req.body };
+    Thing.updateOne({ _id: req.params.id}, {...thingObject, _id: req.params.id})
     .then(_ => res.status(200).json({ message: 'Objet modifié ! '}))
     .catch(error => res.status(400).json({error}));
 };

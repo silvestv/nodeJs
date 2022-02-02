@@ -8,6 +8,8 @@ const express = require('express');
 //entry point ---------------------
 // point d'entrée de l'app express
 const app = express();
+// Donne l'accès au chemin de notre système de fichier
+const path = require('path');
 
 // DECLARATIONS OF ROUTES ----------------------------------------------------------------------------
 // routes (get, post, put, delete) des objets de l'application node
@@ -44,6 +46,10 @@ app.use((req, res, next) => {
     next();
 })
 
+//middleware permettant de servir le dossier images
+// express static permet de servir la route image de manière statique comme
+// un sous-dossier
+app.use('/images', express.static(path.join(__dirname, 'images')));
 // l'app gère l'api stuff via son router et son controller stuff
 app.use('/api/stuff', stuffRoutes);
 // l'app gère l'api d'authentification via son router user et son controller user

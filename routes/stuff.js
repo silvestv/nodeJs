@@ -7,7 +7,11 @@ const router = express.Router();
 const stuffController = require('../controllers/stuff');
 
 // on importe ici notre middleware d'authentification qui vérifie notre token
-const authMiddleware = require('../middleware/auth')
+const authMiddleware = require('../middleware/auth');
+
+//import fu middleware permettant la gestion de fichier (multer)
+const multerMiddleware = require('../middleware/multer-config');
+
 
 // MIDDLEWARE ROUTE----------------------------------------------------------------------------------
 
@@ -16,7 +20,7 @@ const authMiddleware = require('../middleware/auth')
 
 // Middleware POST
 // le endpoint est géré par un router, la logique du endpoint est détenue par un controller
-router.post('/', authMiddleware, stuffController.createThings);
+router.post('/', authMiddleware, multerMiddleware, stuffController.createThings);
 
 // Middleware GET spécifique sur 1 objet
 router.get('/:id', authMiddleware, stuffController.getOneThing);
@@ -27,7 +31,7 @@ router.get('/:id', authMiddleware, stuffController.getOneThing);
 router.get('/', authMiddleware, stuffController.getThings);
 
   //Middleware PUT
-router.put('/:id', authMiddleware, stuffController.modifyThing);
+router.put('/:id', authMiddleware, multerMiddleware, stuffController.modifyThing);
 
 //Middleware Delete
 router.delete('/:id', authMiddleware, stuffController.deleteThing);
